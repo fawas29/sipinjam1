@@ -67,3 +67,12 @@ Solder', 'stok' => 8],
 
 
 
+
+// Route untuk Halaman Login
+Route::get('/login', function () {
+    return view('auth.login');
+});
+
+// Route untuk Halaman Daftar
+Route::get('/daftar', function () {
+    return view('auth.daftar');});
