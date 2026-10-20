@@ -6,32 +6,38 @@
     <div class="card-body">
         <table class="table table-striped table-hover align-middle mb-0">
             <thead class="table-dark">
-                <tr>
-                    <th>No</th>
-                    <th>Kode</th>
-                    <th>Nama Alat</th>
-                    <th>Kategori</th>
-                    <th class="text-center">Stok</th>
-                </tr>
+            <tr>
+                <th>No</th>
+                <th>Kode</th>
+                <th>Nama Alat</th>
+                <th>Kategori</th>
+                <th>Lokasi</th>
+                <th class="text-center">Stok</th>
+            </tr>
             </thead>
             <tbody>
-                @foreach ($alat as $item)
+                @forelse ($alat as $item)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item['kode'] }}</td>
-                    <td>{{ $item['nama'] }}</td>
-                    <td>{{ $item['kategori'] }}</td>
+                    <td>{{ $item->code }}</td>
+                    <td>{{ $item->name }}</td>
+                    <td>{{ $item->category->name }}</td>
+                    <td>{{ $item->location ?? '-' }}</td>
                     <td class="text-center">
-                        @if ($item['stok'] > 0)
-                        <span class="badge bg-success">{{ $item['stok']
-}}</span>
+                        @if ($item->stock > 0)
+                        <span class="badge bg-success">{{ $item->stock }}</span>
                         @else
                         <span class="badge bg-danger">Habis</span>
                         @endif
                     </td>
                 </tr>
-                @endforeach
+                @empty
+                <tr>
+                    <td colspan="6" class="text-center text-muted">Belum ada data alat.</td>
+                </tr>
+                @endforelse
             </tbody>
+            {{ $item->location ?? '-' }} artinya "tampilkan lokasi, atau tanda strip jika kosong"
         </table>
     </div>
 </div>

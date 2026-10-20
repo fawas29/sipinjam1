@@ -15,7 +15,7 @@
         <li class="nav-item"><a href="#" class="nav-link">Daftar Alat</a></li>
         <li class="nav-item"><a href="#" class="nav-link">Aturan Laboratorium</a></li>
         <li class="nav-item">
-          <a href="{{ url('/dashboard') }}" class="btn btn-success text-white ms-2">Masuk ke Dashboard</a>
+         <a href="{{ url('/login') }}" class="btn btn-success text-white ms-2">Masuk</a>
         </li>
       </ul>
 
