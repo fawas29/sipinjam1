@@ -12,53 +12,39 @@ class LoanController extends Controller
     public function index(Request $request)
     {
         $query = Loan::with(['user', 'items'])->latest();
-        
+
         // Mahasiswa hanya boleh melihat peminjamannya sendiri
         if (! $request->user()->isAdmin()) {
             $query->where('user_id', $request->user()->id);
         }
-        
-        $semuaPeminjaman = $query->paginate(10);
-        
+
+        // Tambahan logika filter status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $semuaPeminjaman = $query->paginate(10)->withQueryString();
+
         return view('peminjaman.index', compact('semuaPeminjaman'));
     }
-
     public function create()
     {
         // hanya alat dengan stok > 0
-        $alatTersedia = Item::available()->orderBy('name')->get(); 
-        
+        $alatTersedia = Item::available()->orderBy('name')->get();
+
         return view('peminjaman.create', compact('alatTersedia'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'item_id'  => 'required|exists:items,id',
-            'qty'      => 'required|integer|min:1',
             'due_date' => 'required|date|after_or_equal:today|before_or_equal:' . now()->addDays(7)->toDateString(),
             'notes'    => 'nullable|max:255',
-        ], [
-            'item_id.required'         => 'Pilih alat yang akan dipinjam.',
-            'qty.min'                  => 'Jumlah minimal 1.',
-            'due_date.required'        => 'Tanggal kembali wajib diisi.',
-            'due_date.after_or_equal'  => 'Tanggal kembali tidak boleh sebelum hari ini.',
-            'due_date.before_or_equal' => 'Lama peminjaman maksimal 7 hari.',
+            'items'    => 'required|array',
         ]);
 
-        $alat = Item::findOrFail($validated['item_id']);
-
-        // Cek stok cukup
-        if ($validated['qty'] > $alat->stock) {
-            return back()->withInput()->withErrors([
-                'qty' => "Stok {$alat->name} hanya tersisa {$alat->stock}.",
-            ]);
-        }
-
-        // Tiga perubahan ini berhasil bersama atau batal bersama (Transaksi Database)
-        DB::transaction(function () use ($request, $validated, $alat) {
-            
-            // 1. Catat peminjaman (user_id terisi otomatis lewat relasi)
+        DB::transaction(function () use ($request, $validated) {
+            // 1. Buat data peminjaman utama
             $peminjaman = $request->user()->loans()->create([
                 'loan_date' => today(),
                 'due_date'  => $validated['due_date'],
@@ -66,14 +52,25 @@ class LoanController extends Controller
                 'notes'     => $validated['notes'] ?? null,
             ]);
 
-            // 2. Catat alat yang dipinjam di tabel pivot loan_item
-            $peminjaman->items()->attach($alat->id, ['qty' => $validated['qty']]);
+            // 2. Loop input items yang dikirimkan dari form
+            foreach ($request->items as $itemId => $qty) {
+                if ($qty > 0) {
+                    $alat = Item::findOrFail($itemId);
 
-            // 3. Kurangi stok
-            $alat->decrement('stock', $validated['qty']);
+                    if ($qty > $alat->stock) {
+                        throw new \Exception("Stok {$alat->name} tidak mencukupi.");
+                    }
+
+                    // Attach ke tabel pivot dengan qty
+                    $peminjaman->items()->attach($alat->id, ['qty' => $qty]);
+
+                    // Kurangi stok alat
+                    $alat->decrement('stock', $qty);
+                }
+            }
         });
 
-        return redirect()->route('peminjaman.index')->with('success', 'Peminjaman berhasil dicatat.');
+        return redirect()->route('peminjaman.index')->with('success', 'Peminjaman banyak alat berhasil dicatat.');
     }
 
     public function kembalikan(Loan $peminjaman)

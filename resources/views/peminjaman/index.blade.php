@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Peminjaman')
 @section('content')
+
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h3 class="mb-0">Peminjaman Alat</h3>
     <a href="{{ route('peminjaman.create') }}" class="btn btn-primary">
@@ -9,6 +10,17 @@
 </div>
 <div class="card shadow-sm">
     <div class="card-body">
+        <form method="GET" action="{{ route('peminjaman.index') }}" class="mb-3">
+            <div class="row">
+                <div class="col-md-3">
+                    <select name="status" class="form-control" onchange="this.form.submit()">
+                        <option value="">-- Semua Status --</option>
+                        <option value="dipinjam" {{ request('status') == 'dipinjam' ? 'selected' : '' }}>Dipinjam</option>
+                        <option value="dikembalikan" {{ request('status') == 'dikembalikan' ? 'selected' : '' }}>Dikembalikan</option>
+                    </select>
+                </div>
+            </div>
+        </form>
         <table class="table table-striped align-middle mb-0">
             <thead class="table-dark">
                 <tr>
@@ -46,8 +58,7 @@
                     @if (auth()->user()->isAdmin())
                     <td class="text-end">
                         @if ($peminjaman->status === 'dipinjam')
-                        <form action="{{ route('peminjaman.kembali',
-$peminjaman) }}" method="POST"
+                        <form action="{{ route('peminjaman.kembali',$peminjaman) }}" method="POST"
                             onsubmit="return confirm('Tandai alat sudah dikembalikan?')">
                             @csrf
                             @method('PATCH')

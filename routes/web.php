@@ -5,7 +5,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\LoanController; // Tambahan: Import LoanController untuk fitur Peminjaman
+use App\Http\Controllers\LoanController; 
+use App\Models\pemasok;// Tambahan: Import LoanController untuk fitur Peminjaman
 
 // Route latihan Hari 1 (Dibiarkan tetap ada sesuai instruksi modul)
 Route::get('/', function () {
@@ -70,3 +71,4 @@ Route::middleware('auth')->group(function () {
     // Tambahan: Rute untuk melihat riwayat peminjaman dan membuat form pinjam
     Route::resource('peminjaman', LoanController::class)->only(['index', 'create', 'store']);
 });
+

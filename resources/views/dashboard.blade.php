@@ -23,7 +23,7 @@
         <div class="card border-warning shadow-sm">
             <div class="card-body">
                 <div class="text-muted">Sedang Dipinjam</div>
-               <div class="fs-2 fw-bold text-warning">{{ $sedangDipinjam }}</div>
+                <div class="fs-2 fw-bold text-warning">{{ $sedangDipinjam }}</div>
             </div>
         </div>
     </div>
@@ -32,6 +32,14 @@
             <div class="card-body">
                 <div class="text-muted">Pengembalian Terlambat</div>
                 <div class="fs-2 fw-bold text-danger">6</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-danger text-white shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Peminjaman Terlambat</h5>
+                <h3>{{ $terlambatCount }}</h3>
             </div>
         </div>
     </div>
